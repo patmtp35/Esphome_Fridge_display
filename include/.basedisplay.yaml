@@ -1,0 +1,153 @@
+###############################################################################
+## definition des couleurs et des fontes pour les display
+###############################################################################
+# changelogs:
+# V2.0 ajout des fontes pour lcd Cuisine
+# V1.0 colors + fonts
+####################
+##lilygo S3
+####################
+
+color:
+  - id: night_red
+    red: 100%
+    green: 3%
+    blue: 5%
+    
+  - id: my_red
+    red: 100%
+    green: 0%
+    blue: 0%
+    
+  - id: my_yellow
+    red: 100%
+    green: 100%
+    blue: 0%
+    
+  - id: my_green
+    red: 0%
+    green: 100%
+    blue: 0%
+    
+  - id: my_blue
+    red: 0%
+    green: 0%
+    blue: 100%
+    
+  - id: my_grey
+    red: 50%
+    green: 50%
+    blue: 50%
+    
+  - id: my_white
+    red: 100%
+    green: 100%
+    blue: 100%
+    
+  - id: color_light_grey
+    hex: BBBBBB   
+    
+  - id: color_dark_grey
+    hex: 5F5F5F
+    
+  - id: color_white
+    hex: FFFFFF
+    
+  - id: color_red
+    hex: FF0000
+    
+  - id: color_green
+    hex: 00FF00
+    
+  - id: color_yellow
+    hex: FFFF00    
+    
+    
+    
+# Set fonts
+font:
+  - file: "fonts/boldfont.ttf"
+    id: verysm_boldfont
+    size: 15
+  - file: "fonts/boldfont.ttf"
+    id: small_boldfont
+    size: 25
+  - file: "fonts/boldfont.ttf"
+    id: med1_boldfont
+    size: 35    
+  - file: "fonts/boldfont.ttf"
+    id: med_boldfont
+    size: 40
+  - file: "fonts/boldfont.ttf"
+    id: big_boldfont
+    size: 60
+  - file: "fonts/boldfont.ttf"
+    id: vbig_boldfont
+    size: 80
+    
+  - file: "gfonts://Roboto"
+    id: ipfont
+    size: 15
+  - file: "gfonts://Roboto"
+    id: up_barfont
+    size: 25
+  - file: "gfonts://Roboto"
+    id: big_clockfont
+    size: 60
+  - file: "gfonts://Roboto"
+    id: font_temp
+    size: 28
+    
+  - file: "fonts/Helvetica.ttf"
+    id: helvetica_48
+    size: 48
+  - file: "fonts/Helvetica.ttf"
+    id: helvetica_24
+    size: 24
+  - file: "fonts/Helvetica.ttf"
+    id: helvetica_12
+    size: 12    
+
+## LCD Cuisine
+
+  - file: 
+      type: gfonts
+      family: Material Symbols Sharp
+      weight: 400
+    id: font_weather_icons_xsmall
+    size: 20
+    glyphs:
+      - "\U0000F159" # clear-night
+      - "\U0000F15B" # cloudy
+      - "\U0000F172" # partlycloudy
+      - "\U0000E818" # fog      
+      - "\U0000F67F" # hail
+      - "\U0000EBDB" # lightning, lightning-rainy
+      - "\U0000F61F" # pouring
+      - "\U0000F61E" # rainy
+      - "\U0000F61C" # snowy
+      - "\U0000F61D" # snowy-rainy
+      - "\U0000E81A" # sunny
+      - "\U0000EFD8" # windy, windy-variant
+      - "\U0000F7F3" # exceptional
+      
+  - file: 
+      type: gfonts
+      family: Material Symbols Sharp
+      weight: 400
+    id: font_weather_icons_small
+    size: 32
+    glyphs:
+      - "\U0000F159" # clear-night
+      - "\U0000F15B" # cloudy
+      - "\U0000F172" # partlycloudy
+      - "\U0000E818" # fog      
+      - "\U0000F67F" # hail
+      - "\U0000EBDB" # lightning, lightning-rainy
+      - "\U0000F61F" # pouring
+      - "\U0000F61E" # rainy
+      - "\U0000F61C" # snowy
+      - "\U0000F61D" # snowy-rainy
+      - "\U0000E81A" # sunny
+      - "\U0000EFD8" # windy, windy-variant
+      - "\U0000F7F3" # exceptional      
