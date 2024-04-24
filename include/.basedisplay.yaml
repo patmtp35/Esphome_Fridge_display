@@ -110,44 +110,43 @@ font:
 
 ## LCD Cuisine
 
-  - file: 
-      type: gfonts
-      family: Material Symbols Sharp
-      weight: 400
-    id: font_weather_icons_xsmall
-    size: 20
-    glyphs:
-      - "\U0000F159" # clear-night
-      - "\U0000F15B" # cloudy
-      - "\U0000F172" # partlycloudy
-      - "\U0000E818" # fog      
-      - "\U0000F67F" # hail
-      - "\U0000EBDB" # lightning, lightning-rainy
-      - "\U0000F61F" # pouring
-      - "\U0000F61E" # rainy
-      - "\U0000F61C" # snowy
-      - "\U0000F61D" # snowy-rainy
-      - "\U0000E81A" # sunny
-      - "\U0000EFD8" # windy, windy-variant
-      - "\U0000F7F3" # exceptional
-      
-  - file: 
-      type: gfonts
-      family: Material Symbols Sharp
-      weight: 400
-    id: font_weather_icons_small
-    size: 32
-    glyphs:
-      - "\U0000F159" # clear-night
-      - "\U0000F15B" # cloudy
-      - "\U0000F172" # partlycloudy
-      - "\U0000E818" # fog      
-      - "\U0000F67F" # hail
-      - "\U0000EBDB" # lightning, lightning-rainy
-      - "\U0000F61F" # pouring
-      - "\U0000F61E" # rainy
-      - "\U0000F61C" # snowy
-      - "\U0000F61D" # snowy-rainy
-      - "\U0000E81A" # sunny
-      - "\U0000EFD8" # windy, windy-variant
-      - "\U0000F7F3" # exceptional      
+  - file: 'fonts/materialdesignicons-webfont.ttf'
+    id: font_mdi_large
+    size: 200
+    glyphs: &mdi-weather-glyphs
+      - "\U000F0590" # mdi-weather-cloudy
+      - "\U000F0F2F" # mdi-weather-cloudy-alert
+      - "\U000F0E6E" # mdi-weather-cloudy-arrow-right
+      - "\U000F0591" # mdi-weather-fog
+      - "\U000F0592" # mdi-weather-hail
+      - "\U000F0F30" # mdi-weather-hazy
+      - "\U000F0898" # mdi-weather-hurricane
+      - "\U000F0593" # mdi-weather-lightning
+      - "\U000F067E" # mdi-weather-lightning-rainy
+      - "\U000F0594" # mdi-weather-clear-night
+      - "\U000F0F31" # mdi-weather-night-partly-cloudy
+      - "\U000F0595" # mdi-weather-partly-cloudy
+      - "\U000F0F32" # mdi-weather-partly-lightning
+      - "\U000F0F33" # mdi-weather-partly-rainy
+      - "\U000F0F34" # mdi-weather-partly-snowy
+      - "\U000F0F35" # mdi-weather-partly-snowy-rainy
+      - "\U000F0596" # mdi-weather-pouring
+      - "\U000F0597" # mdi-weather-rainy
+      - "\U000F0598" # mdi-weather-snowy
+      - "\U000F0F36" # mdi-weather-snowy-heavy
+      - "\U000F067F" # mdi-weather-snowy-rainy
+      - "\U000F0599" # mdi-weather-sunny
+      - "\U000F0F37" # mdi-weather-sunny-alert
+      - "\U000F14E4" # mdi-weather-sunny-off
+      - "\U000F059A" # mdi-weather-sunset
+      - "\U000F059B" # mdi-weather-sunset-down
+      - "\U000F059C" # mdi-weather-sunset-up
+      - "\U000F0F38" # mdi-weather-tornado
+      - "\U000F059D" # mdi-weather-windy
+      - "\U000F059E" # mdi-weather-windy-variant
+      - "\U000F10AF" # mdi-door-closed-lock
+      - "\U000F081C" # mdi-door-open
+  - file: 'fonts/materialdesignicons-webfont.ttf'
+    id: font_mdi_medium
+    size: 40
+    glyphs: *mdi-weather-glyphs     
