@@ -1,12 +1,13 @@
 #########################################################
 #  Display Cuisine SC01_V3.3
-#  480*320  (180 portrait)
+#  480*320  (0 portrait)
 #  TouchScreen 
 #  backlight switch via homeassistant or Web
 ##############################################
-# V 1.6
+# V 1.7
 ###################################
 #changelog:
+#  V 1.7 Meteo  
 #  V 1.6 Creation de l'interface page 1
 #  V 1.5 First Release
 #  V 1.0 Tests (POC)
@@ -15,16 +16,16 @@ substitutions:
   #############################
   # comomon substitution #####
   ############################  
-  name: "lcd_cuisine"
+  name: "lcd-cuisine"
   esphome_name: "Lcd Display Cuisine Sc01"
   # nonm affiché dans l'interface #
   friendly_name: "lcd_cuisine"
   id_prefix: "lcd_cuisine"
   sensor_prefix: "lcd_cuisine"
   #######################################
-  device_description: "Lcd Display Cuisine : Msunpv + Heure + tempo + Linky + Weather + soleil"
+  device_description: "Lcd Display Cuisine : Msunpv + Heure + tempo + Linky + Weather + soleil + courrier"
   projectname: "Pat.SC01 LCD Display Cuisine"
-  appversion: 1.6.0
+  appversion: 1.7.0
   log_level: "INFO"
   display_log: "INFO"
   baud_ratelog: "0"
@@ -40,11 +41,10 @@ substitutions:
   latitude: "43.641879°"
   longitude: "3.506869°"
   #######################################
-  # variables
+  # variables en attente d'utilisation
   #######################################
   sm1_maxw : "440"
   msunpv_maxw : "3700"
-  residuel: "4"
   puisscumulus: "2200"
   puissrad: "950"
   
@@ -55,14 +55,21 @@ esphome:
   project:
     name: ${projectname}
     version: ${appversion}
+
+          
   # On boot set the backlight to 50%
+  #
+  # a finir backlight
+  #
   on_boot:
     then:
       #- display.page.show: Jour
       - light.turn_on:
           id: ${id_prefix}_backlight
           brightness: 75%
-          
+
+
+
 esp32:
   board: esp-wrover-kit
   framework:
@@ -130,7 +137,8 @@ image:
   - file: "img/linky.png"
     id: linky_img
     type: RGB24
-    resize: 80x80     
+    resize: 80x80   
+ 
  ## definition des icones
   - file: mdi:solar-power-variant
     id: solar_charge_ico
@@ -164,7 +172,19 @@ image:
     resize: 25x25  
   - file: mdi:battery-arrow-up
     id: bat_prod_ico
-    resize: 25x25          
+    resize: 25x25    
+  - file: mdi:email-check-outline
+    id: courrier_ico
+    resize: 25x25
+  - file: mdi:home-thermometer-outline
+    id: Temp_in_ico
+    resize: 25x25
+  - file: mdi:sun-thermometer-outline
+    id: temp_out_ico
+    resize: 25x25  
+  - file: mdi:water-percent
+    id: Hum_out_ico
+    resize: 25x25  
 #########################################################   
 # Recuperation des sensors de HA
 ########################################################  
@@ -204,6 +224,7 @@ sensor:
     id: linky_today
     entity_id: sensor.teleinfo_energy_today
     internal: true
+
 ## sensors MsunPV 
   - platform: homeassistant
     id: msun_powres
@@ -223,6 +244,9 @@ sensor:
   - platform: homeassistant
     id: msun_bal
     entity_id: sensor.msunpv_outbal
+    filters:
+      # on divise par 4 pour avoir sur 100
+      - lambda: return x/4.0;      
     internal: true
   - platform: homeassistant
     id: msun_baldeg
@@ -239,8 +263,49 @@ sensor:
       # Multiplication factor from W to kW is 0.001
       - multiply: 0.001
     internal: true
+## sensor Météo
+  - platform: homeassistant
+    id: Temp_out
+    entity_id: sensor.tempextar_rf_temperature
+    internal: True
+  - platform: homeassistant
+    id: Temp_in
+    entity_id: sensor.temphumcuisine_zig_temperature
+    internal: True
+  - platform: homeassistant
+    id: Hum_out
+    entity_id: sensor.tempextar_rf_humidite
+    internal: true
+  - platform: homeassistant
+    id: temp_now
+    entity_id: sensor.tempcurrent
+    internal: true
+  - platform: homeassistant
+    id: temp_h1
+    entity_id: sensor.temperature_forecast_h1
+    internal: true
+  - platform: homeassistant
+    id: temp_h2
+    entity_id: sensor.temperature_forecast_h2
+    internal: true
+  - platform: homeassistant
+    id: temp_h3
+    entity_id: sensor.temperature_forecast_h3
+    internal: true
+  - platform: homeassistant
+    id: temp_d1
+    entity_id: sensor.temperature_forecast_d1
+    internal: true
+  - platform: homeassistant
+    id: temp_d2
+    entity_id: sensor.temperature_forecast_d2
+    internal: true
+  - platform: homeassistant
+    id: temp_d3
+    entity_id: sensor.temperature_forecast_d3     
+    internal: true
 
-## other sensors
+## Autre sensors
   - platform: homeassistant
     id: home_conso
     entity_id: sensor.home_consumed_power
@@ -261,16 +326,18 @@ sensor:
     id: ballon_pac_power
     entity_id: sensor.ballon_thermodynamique_power 
     internal: true
-  
+
 ########################################################
-#binary_sensor:
-
-
-
+binary_sensor:
+  - platform: homeassistant
+    id: night_state
+    entity_id: binary_sensor.jour_nuit_ar
+    internal: true
 ########################################################    
+
 text_sensor:
 
-## etat pac ballon true ou flase  
+### etat pac ballon true ou flase  
   - platform: homeassistant
     id: ballon_pac_state
     entity_id: sensor.ballon_pac
@@ -284,19 +351,19 @@ text_sensor:
     id: tempo_j1
     entity_id: sensor.rte_tempo_prochaine_couleur
     internal: true
-    ## sensor courier
+### sensor courier
   - platform: homeassistant
     id: courrier
     entity_id: input_boolean.courrier
     internal: true
-## affiche ip dans partie Web
+### affiche ip dans partie Web
   - platform: wifi_info
     ip_address:
       name: "IP Address"
       id: host_ip
       entity_category: diagnostic
       icon: mdi:router-wireless
-## sunset - sunrise
+### sunset - sunrise
   - platform: sun
     name: Sunrise
     id: sun_rise
@@ -307,55 +374,41 @@ text_sensor:
     id: sun_set
     type: sunset
     format: "%H:%M"
-## mode charge batteries      
+### mode charge batteries      
   - platform: homeassistant
     id: sm1_chargemode
     name: "Charge :"
     entity_id: sensor.smartsolar1_esp_charging_mode
     internal: true
     icon: "mdi:solar-power"       
-## meteo Sensors
-  # current conditions
+### meteo 
   - platform: homeassistant
-    id: condition
-    name: Current Conditions
-    entity_id: weather.weather_forecast_home_hourly
-
-  # temperature
+    id: weather_now
+    entity_id: sensor.weathercurrent
+    internal: true
   - platform: homeassistant
-    id: temperature
-    name: Current Temperature
-    entity_id: weather.weather_forecast_home_hourly
-    attribute: temperature
-
-  # met.no hourly weather forecast, which we parse immediately into the weatherForecastHourly object
+    id: weather_h1
+    entity_id: sensor.weather_forecast_h1
+    internal: true
   - platform: homeassistant
-    id: hourlyForecast
-    name: Hourly Forecast
-    entity_id: weather.home_hourly
-    attribute: forecast
-    filters:
-    - to_lower
-    on_value:
-      then:
-     # - lambda: |-
-     #     parseHourlyForecast(x);
-     # - script.execute: all_data_received
-
-  # accuweather weekly weather forecast, which we parse immediately into the weatherForecastDaily object
+    id: weather_h2
+    entity_id: sensor.weather_forecast_h2
+    internal: true
   - platform: homeassistant
-    id: dailyForecast
-    name: Daily Forecast
-    entity_id: weather.weather_forecast_home_hourly
-    attribute: forecast
-    filters:
-    - to_lower
-    on_value:
-      then:
-    #  - lambda: |-
-    #      parseDailyForecast(x);
-    #  - script.execute: all_data_received
-
+    id: weather_h3
+    entity_id: sensor.weather_forecast_h3
+    internal: true
+  - platform: homeassistant
+    id: weather_d1
+    entity_id: sensor.weather_forecast_d1
+    internal: true 
+  - platform: homeassistant
+    id: weather_d2
+    entity_id: sensor.weather_forecast_d2
+    internal: true 
+  - platform: homeassistant
+    id: weather_d3
+    entity_id: sensor.weather_forecast_d3
 ##################################################################
 #        Scripts
 ##################################################################
@@ -374,7 +427,7 @@ display:
     cs_pin: GPIO15
     dc_pin: GPIO21
     reset_pin: GPIO22
-    rotation: 180
+    rotation: 0
     pages:
       - id: Jour
         lambda: |-
@@ -386,6 +439,9 @@ display:
           // sunrset
           it.printf(280, 10, id(verysm_boldfont), my_yellow, TextAlign::CENTER, id(sun_set).state.c_str());
           it.image(260, 20, id(sunset_img));
+          // courrier
+          if (id(courrier).state == "on") { 
+          it.image(148, 44, id(courrier_ico));} // affiche icone courrier si
           // tempo J
           if (id(tempo_j).state == "Bleu") {
           it.filled_circle(24,128 , 12, my_blue);}
@@ -403,7 +459,53 @@ display:
           it.filled_circle(294,128 , 12, my_red);
           }
           // Cadre meteo
-          it.rectangle(0, 70, 320, 76, id(my_white));           
+          it.rectangle(0, 70, 320, 76, id(my_white));
+          // Map weather states to MDI characters.
+          std::map<std::string, std::string> weather_icon_map
+          {
+          {"cloudy", "\U000F0590"},
+          {"cloudy-alert", "\U000F0F2F"},
+          {"cloudy-arrow-right", "\U000F0E6E"},
+          {"fog", "\U000F0591"},
+          {"hail", "\U000F0592"},
+          {"hazy", "\U000F0F30"},
+          {"hurricane", "\U000F0898"},
+          {"lightning", "\U000F0593"},
+          {"lightning-rainy", "\U000F067E"},
+          {"clear-night", "\U000F0594"},
+          {"night-partly-cloudy", "U000F0F31"},
+          {"partlycloudy", "\U000F0595"},
+          {"partly-lightning", "\U000F0F32"},
+          {"partly-rainy", "\U000F0F33"},
+          {"partly-snowy", "\U000F0F34"},
+          {"partly-snowy-rainy", "\U000F0F35"},
+          {"pouring", "\U000F0596"},
+          {"rainy", "\U000F0597"},
+          {"snowy", "\U000F0598"},
+          {"snowy-heavy", "\U000F0F36"},
+          {"snowy-rainy", "\U000F067F"},
+          {"sunny", "\U000F0599"},
+          {"sunny-alert", "\U000F0F37"},
+          {"sunny-off", "\U000F14E4"},
+          {"sunset", "\U000F059A"},
+          {"sunset-down", "\U000F059B"},
+          {"sunset-up", "\U000F059C"},
+          {"tornado", "\U000F0F38"},
+          {"windy", "\U000F059D"},
+          {"windy-variant", "\U000F059E"},
+          };
+          // Meteo du moment
+          it.printf(160,70, id(verysm_boldfont), my_green, TextAlign::CENTER_HORIZONTAL, "- Sur 4H -");
+          // meteo maintenant
+          it.printf(100, 85, id(font_mdi_medium), TextAlign::CENTER_HORIZONTAL, "%s", weather_icon_map[id(weather_now).state.c_str()].c_str());
+          it.printf(100, 125, id(verysm_boldfont), TextAlign::CENTER_HORIZONTAL, "%.1f°", id(temp_now).state);
+          // sur 3h
+          it.printf(140,85,id(font_mdi_medium),TextAlign::CENTER_HORIZONTAL,"%s",weather_icon_map[id(weather_h1).state.c_str()].c_str());
+          it.printf(180,85,id(font_mdi_medium),TextAlign::CENTER_HORIZONTAL,"%s",weather_icon_map[id(weather_h2).state.c_str()].c_str());
+          it.printf(220,85,id(font_mdi_medium),TextAlign::CENTER_HORIZONTAL,"%s",weather_icon_map[id(weather_h3).state.c_str()].c_str());
+          it.printf(140,125,id(verysm_boldfont),TextAlign::CENTER_HORIZONTAL, "%.0f°", id(temp_h1).state);
+          it.printf(180,125,id(verysm_boldfont),TextAlign::CENTER_HORIZONTAL, "%.0f°", id(temp_h2).state);
+          it.printf(220,125,id(verysm_boldfont),TextAlign::CENTER_HORIZONTAL, "%.0f°", id(temp_h3).state);
           // prevision prod J et J+1
           it.print(18, 70, id(small_boldfont), my_yellow, "J");
           it.printf(28, 108, id(verysm_boldfont), my_yellow, TextAlign::CENTER, "%.1fKw", id(prevprod_j).state); //Write total solaire jour
@@ -428,12 +530,28 @@ display:
           it.printf(268, 322, id(med1_boldfont), my_white, TextAlign::CENTER, "%.0fw", id(sm1_panelwatts).state); //Write Solar Panel Watts
           it.image(216,342, id(bat_voltage_ico)); 
           it.printf(268, 384, id(med1_boldfont), my_white, TextAlign::CENTER, "%.1fv", id(sm1_batvoltage).state); //Write bat voltage
-          if (id(prod_bat).state >= 0) {
-          it.image(216,406, id(charge_mode_ico)); 
-          it.printf(266, 454, id(med1_boldfont), my_white, TextAlign::CENTER, "%s", id(sm1_chargemode).state.c_str()); //write bat charge mode
+          if (id(prod_bat).state >0) {
+          it.image(214,404, id(bat_prod_ico)); 
+          it.printf(266, 454, id(med1_boldfont), my_green, TextAlign::CENTER, "%.0fw", id(prod_bat).state); // write bat prod W  
+          if (abs(id(prod_bat).state) >=1) {
+          it.filled_rectangle(244, 406, 6,20 , my_green);}
+          if (abs(id(prod_bat).state) >75) {
+          it.filled_rectangle(252, 406, 6,20 , my_green);}
+          if (abs(id(prod_bat).state) >150) {
+          it.filled_rectangle(260, 406, 6,20 , my_green);}
+          if (abs(id(prod_bat).state) >225) {
+          it.filled_rectangle(268, 406, 6,20 , my_yellow);}
+          if (abs(id(prod_bat).state) >300) {
+          it.filled_rectangle(276, 406, 6,20 , my_yellow);}
+          if (abs(id(prod_bat).state) >375) {
+          it.filled_rectangle(284, 406, 6,20 , my_yellow);}
+          if (abs(id(prod_bat).state) >450) {
+          it.filled_rectangle(292, 406, 6,20 , my_red);}
+          if (abs(id(prod_bat).state) >525) {
+          it.filled_rectangle(298, 406, 6,20 , my_red);}
           } else {
-          it.image(216,406, id(bat_prod_ico)); 
-          it.printf(266, 454, id(med1_boldfont), my_green, TextAlign::CENTER, "%.0fw", id(prod_bat).state); // write bat prod W
+          it.image(216,406, id(charge_mode_ico)); 
+          it.printf(266, 454, id(med1_boldfont), my_white, TextAlign::CENTER, "%s", id(sm1_chargemode).state.substr(0,5).c_str()); //write bat charge mode 4 chars
           }
           // bargraph Panneaux Batteries
           if (abs(id(sm1_panelwatts).state) >=1) {
@@ -463,21 +581,10 @@ display:
           it.filled_rectangle(281, 230, 15,31 , my_red);}
           // Valeurs Msunpv
           it.image(6,280, id(solar_charge_ico));
+          if (id(night_state).state) {
+          it.printf(55, 322, id(med1_boldfont), my_white, TextAlign::CENTER, "Nuit"); //Write night mode
+          } else { 
           it.printf(55, 322, id(med1_boldfont), my_white, TextAlign::CENTER, "%.0fw", abs(id(msun_powpv).state)); //Write Solar Panel Watts
-          it.image(6,342, id(msun_res_ico));
-          if (id(msun_powres).state >= 0) {
-          it.printf(54, 384, id(med1_boldfont), my_white, TextAlign::CENTER, "%.0fw", id(msun_powres).state);} //Write from-to reseau
-          if (id(msun_powres).state < 0) {
-          it.printf(54, 384, id(med1_boldfont), my_yellow, TextAlign::CENTER, "%.0fw", id(msun_powres).state);}   
-          it.image(1,406, id(msun_rad_ico));
-          it.printf(64, 418, id(med1_boldfont), my_white, TextAlign::CENTER, "%.0f%%", id(msun_rad).state); //Write % rad
-          if (id(ballon_pac_state).state == "True") {
-          it.image(1,444, id(ballmode_pac_ico)); // ballon sur pac
-          it.printf(64, 454, id(med1_boldfont), my_white, TextAlign::CENTER, "%.0fw", id(ballon_pac_power).state); //Write ballon conso inst W
-          } else {
-          it.image(1,444, id(msun_bal_ico)); // ballon sur routeur
-          it.printf(64, 454, id(med1_boldfont), my_white, TextAlign::CENTER, "%.0f%%", id(msun_bal).state); //Write % bal
-          }
           // bargraph msun panneaux
           if (abs(id(msun_powpv).state) >=1) {
           it.filled_rectangle(34, 282, 6,20 , my_green);}
@@ -495,6 +602,22 @@ display:
           it.filled_rectangle(82, 282, 6,20 , my_red);}
           if (abs(id(msun_powpv).state) >2450) {
           it.filled_rectangle(90, 282, 6,20 , my_red);}
+          }
+          // msun reseau
+          it.image(6,342, id(msun_res_ico));
+          if (id(msun_powres).state >= 0) {
+          it.printf(54, 384, id(med1_boldfont), my_white, TextAlign::CENTER, "%.0fw", id(msun_powres).state);} //Write from-to reseau
+          if (id(msun_powres).state < 0) {
+          it.printf(54, 384, id(med1_boldfont), my_yellow, TextAlign::CENTER, "%.0fw", id(msun_powres).state);}   
+          it.image(1,406, id(msun_rad_ico));
+          it.printf(64, 418, id(med1_boldfont), my_white, TextAlign::CENTER, "%.0f%%", id(msun_rad).state); //Write % rad
+          if (id(ballon_pac_state).state == "True") {
+          it.image(1,444, id(ballmode_pac_ico)); // ballon sur pac
+          it.printf(64, 454, id(med1_boldfont), my_white, TextAlign::CENTER, "%.0fw", id(ballon_pac_power).state); //Write ballon conso inst W
+          } else {
+          it.image(1,444, id(msun_bal_ico)); // ballon sur routeur
+          it.printf(64, 454, id(med1_boldfont), my_white, TextAlign::CENTER, "%.0f%%", id(msun_bal).state); //Write % bal
+          }
           // Valeurs Linky
           it.image(106,280, id(home_conso_ico));
           it.printf(158, 322, id(med1_boldfont), my_white, TextAlign::CENTER, "%.0fw", abs(id(home_conso).state)); //Write conso inst maison
