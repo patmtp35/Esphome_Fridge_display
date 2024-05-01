@@ -4,9 +4,10 @@
 #  TouchScreen 
 #  backlight switch via homeassistant or Web
 ##############################################
-# V 1.7
+# V 1.8
 ###################################
 #changelog:
+#  V 1.8 Gestion lumi  
 #  V 1.7 Meteo  
 #  V 1.6 Creation de l'interface page 1
 #  V 1.5 First Release
@@ -25,7 +26,7 @@ substitutions:
   #######################################
   device_description: "Lcd Display Cuisine : Msunpv + Heure + tempo + Linky + Weather + soleil + courrier"
   projectname: "Pat.SC01 LCD Display Cuisine"
-  appversion: 1.7.0
+  appversion: 1.8.0
   log_level: "INFO"
   display_log: "INFO"
   baud_ratelog: "0"
@@ -320,7 +321,7 @@ sensor:
     internal: true
   - platform: homeassistant
     id: prod_bat
-    entity_id: sensor.priseprodbatterie_zig_power
+    entity_id: sensor.prise_prod_batteries_power
     internal: true
   - platform: homeassistant
     id: ballon_pac_power
