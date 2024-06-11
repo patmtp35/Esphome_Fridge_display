@@ -215,15 +215,15 @@ sensor:
 ## sensors Linky
   - platform: homeassistant
     id: linky_va
-    entity_id: sensor.teleinfo_energy_apparentpower
+    entity_id: sensor.teleinfo_conso_puiss_apparente
     internal: true
   - platform: homeassistant
     id: linky_w
-    entity_id: sensor.teleinfo_energy_power
+    entity_id: sensor.teleinfo_conso_puiss_active
     internal: true
   - platform: homeassistant
     id: linky_today
-    entity_id: sensor.teleinfo_energy_today
+    entity_id: sensor.teleinfo_conso_aujourdhui
     internal: true
 
 ## sensors MsunPV 
