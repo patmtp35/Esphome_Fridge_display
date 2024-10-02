@@ -13,10 +13,10 @@ Now i'm there Work is still in progress .
 
 to do list :
 
-- Dimable Light Screen 
-- Enable Touch Screen
-- Night Page
-- Graphs Page
+- Dimable Light Screen => Ok Done with HA Automation
+- Enable Touch Screen => finaly Not usefull for me as it was in top oh the fridge :)
+- Night Page => not usefull for me 
+- Graphs Page => not usefull for me
 
 
 Inspirations: 
