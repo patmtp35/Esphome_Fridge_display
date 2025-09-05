@@ -4,9 +4,10 @@
 #  TouchScreen 
 #  backlight switch via homeassistant or Web
 ##############################################
-# V 1.8
+# V 1.9
 ###################################
 #changelog:
+#  V 1.9 modifi pour affichage suite a incopatibilité Esphome 2025 + correction linky today 
 #  V 1.8 Gestion lumi  
 #  V 1.7 Meteo  
 #  V 1.6 Creation de l'interface page 1
@@ -144,48 +145,78 @@ image:
   - file: mdi:solar-power-variant
     id: solar_charge_ico
     resize: 25x25
+    type: grayscale
+    
   - file: mdi:flash-triangle-outline
     id: bat_voltage_ico
-    resize: 25x25   
+    resize: 25x25 
+    type: grayscale
+    
   - file: mdi:solar-power
     id: charge_mode_ico
     resize: 25x25
+    type: grayscale
+    
   - file: mdi:transmission-tower
     id: msun_res_ico
-    resize: 25x25 
+    resize: 25x25
+    type: grayscale
+    
   - file: mdi:radiator
     id: msun_rad_ico
     resize: 25x25 
+    type: grayscale
+    
   - file: mdi:water-boiler
     id: msun_bal_ico
-    resize: 25x25  
+    resize: 25x25
+    type: grayscale  
+    
   - file: mdi:water-boiler-auto
     id: ballmode_pac_ico
-    resize: 25x25    
+    resize: 25x25 
+    type: grayscale  
+    
   - file: mdi:home-lightning-bolt
     id: home_conso_ico
     resize: 28x28
+    type: grayscale
+    
   - file: mdi:transmission-tower-export
     id: linky_conso_ico
     resize: 25x25 
+    type: grayscale
+    
   - file: mdi:lightning-bolt-outline
     id: totj_linky_ico
     resize: 25x25  
+    type: grayscale
+    
   - file: mdi:battery-arrow-up
     id: bat_prod_ico
-    resize: 25x25    
+    resize: 25x25
+    type: grayscale  
+      
   - file: mdi:email-check-outline
     id: courrier_ico
     resize: 25x25
+    type: grayscale
+    
   - file: mdi:home-thermometer-outline
     id: Temp_in_ico
     resize: 25x25
+    type: grayscale 
+    
   - file: mdi:sun-thermometer-outline
     id: temp_out_ico
     resize: 25x25  
+    type: grayscale
+    
   - file: mdi:water-percent
     id: Hum_out_ico
-    resize: 25x25  
+    resize: 25x25 
+    type: grayscale
+    
 #########################################################   
 # Recuperation des sensors de HA
 ########################################################  
@@ -224,6 +255,14 @@ sensor:
   - platform: homeassistant
     id: linky_today
     entity_id: sensor.teleinfo_conso_aujourdhui
+    # modif 05-09-25
+    unit_of_measurement: 'kWh'
+    state_class: total_increasing
+    device_class: energy
+    accuracy_decimals: 3
+    filters:
+      # Multiplication factor from W to kW is 0.001
+      - multiply: 0.001
     internal: true
 
 ## sensors MsunPV 
@@ -421,6 +460,9 @@ script:
 ##################################################################
 # definition de l'ecran et des pages 
 ##################################################################
+psram:
+  mode: quad
+  
 display:
   - platform: ili9xxx
     id: ${id_prefix}_display
@@ -428,6 +470,8 @@ display:
     cs_pin: GPIO15
     dc_pin: GPIO21
     reset_pin: GPIO22
+    color_palette: NONE
+    invert_colors: false
     rotation: 0
     pages:
       - id: Jour
