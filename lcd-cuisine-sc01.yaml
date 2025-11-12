@@ -4,9 +4,10 @@
 #  TouchScreen 
 #  backlight switch via homeassistant or Web
 ##############################################
-# V 1.9
+# V 2.0
 ###################################
 #changelog:
+#  V 2.0 Modif augmentation puissance solaire + modif victrons  + Corrections
 #  V 1.9 modifi pour affichage suite a incopatibilité Esphome 2025 + correction linky today 
 #  V 1.8 Gestion lumi  
 #  V 1.7 Meteo  
@@ -27,7 +28,7 @@ substitutions:
   #######################################
   device_description: "Lcd Display Cuisine : Msunpv + Heure + tempo + Linky + Weather + soleil + courrier"
   projectname: "Pat.SC01 LCD Display Cuisine"
-  appversion: 1.8.0
+  appversion: 2.0.0
   log_level: "INFO"
   display_log: "INFO"
   baud_ratelog: "0"
@@ -45,7 +46,7 @@ substitutions:
   #######################################
   # variables en attente d'utilisation
   #######################################
-  sm1_maxw : "440"
+  sm1_maxw : "1340"
   msunpv_maxw : "3700"
   puisscumulus: "2200"
   puissrad: "950"
@@ -81,8 +82,7 @@ esp32:
 ### inclusion de la partie commune 
 ###################################
 
-<<: !include .common.yaml
-<<: !include .basedisplay.yaml
+<<: [!include .commonv2.yaml, !include .basedisplay.yaml]
 
 
 # Enable logging
@@ -122,23 +122,23 @@ spi:
 image:
   - file: "img/sunrise.png"
     id: sunrise_img
-    type: RGB24
+    type: RGB
     resize: 40x40
   - file: "img/sunset.png"
     id: sunset_img
-    type: RGB24
+    type: RGB
     resize: 40x40    
   - file: "img/battery_1.png"
     id: battery_img
-    type: RGB24
+    type: RGB
     resize: 87x80
   - file: "img/msunpv.png"
     id: msunpv_img
-    type: RGB24
+    type: RGB
     resize: 87x80
   - file: "img/linky.png"
     id: linky_img
-    type: RGB24
+    type: RGB
     resize: 80x80   
  
  ## definition des icones
@@ -215,34 +215,43 @@ image:
   - file: mdi:water-percent
     id: Hum_out_ico
     resize: 25x25 
-    type: grayscale
+    type: grayscale  
     
 #########################################################   
 # Recuperation des sensors de HA
 ########################################################  
 sensor:
-## smartsolar 1  
+## smartsolar 1 et 2 - BMS1 BMS2 
   - platform: homeassistant
-    id: sm1_batvoltage
+    id: sm0_batvoltage
     entity_id: sensor.smartsolar1_esp_battery_voltage
     internal: true
   - platform: homeassistant
-    id: sm1_panelwatts
-    entity_id: sensor.smartsolar1_esp_panel_power
+    id: sm1_batvoltage
+    entity_id: sensor.bms1_24v150ah_adc
     internal: true
   - platform: homeassistant
-    id: sm1_panelvolts
-    entity_id: sensor.smartsolar1_esp_panel_voltage
+    id: sm2_batvoltage
+    entity_id: sensor.bms2_adc
+    internal: true    
+    # 2*mppt
+  - platform: homeassistant
+    id: sm1_panelwatts
+    entity_id: sensor.total_watts_victrons
     internal: true
+  #- platform: homeassistant
+  #  id: sm1_panelvolts
+  #  entity_id: sensor.smartsolar1_esp_panel_voltage
+  # internal: true
+    # 2 * mppt
   - platform: homeassistant
     id: sm1_panelamps
-    entity_id: sensor.smartsolar1_esp_panel_current
+    entity_id: sensor.total_amp_victrons
     internal: true
   - platform: homeassistant
     id: batprcent 
-    entity_id: sensor.bms24v_pourcent
+    entity_id: sensor.bms1_24v_pourcent
     internal: true
-    
 ## sensors Linky
   - platform: homeassistant
     id: linky_va
@@ -256,13 +265,6 @@ sensor:
     id: linky_today
     entity_id: sensor.teleinfo_conso_aujourdhui
     # modif 05-09-25
-    unit_of_measurement: 'kWh'
-    state_class: total_increasing
-    device_class: energy
-    accuracy_decimals: 3
-    filters:
-      # Multiplication factor from W to kW is 0.001
-      - multiply: 0.001
     internal: true
 
 ## sensors MsunPV 
@@ -307,10 +309,6 @@ sensor:
   - platform: homeassistant
     id: Temp_out
     entity_id: sensor.tempextar_rf_temperature
-    internal: True
-  - platform: homeassistant
-    id: Temp_in
-    entity_id: sensor.temphumcuisine_zig_temperature
     internal: True
   - platform: homeassistant
     id: Hum_out
@@ -518,7 +516,7 @@ display:
           {"lightning", "\U000F0593"},
           {"lightning-rainy", "\U000F067E"},
           {"clear-night", "\U000F0594"},
-          {"night-partly-cloudy", "U000F0F31"},
+          {"night-partly-cloudy", "\U000F0F31"},
           {"partlycloudy", "\U000F0595"},
           {"partly-lightning", "\U000F0F32"},
           {"partly-rainy", "\U000F0F33"},
@@ -572,7 +570,7 @@ display:
           it.image(120, 224, id(linky_img));
           // Valeurs Batteries
           it.image(216,280, id(solar_charge_ico));
-          it.printf(268, 322, id(med1_boldfont), my_white, TextAlign::CENTER, "%.0fw", id(sm1_panelwatts).state); //Write Solar Panel Watts
+          it.printf(268, 322, id(med1_boldfont), my_white, TextAlign::CENTER, "%.0fw", id(sm1_panelwatts).state); //Write Total Solar Panel Watts
           it.image(216,342, id(bat_voltage_ico)); 
           it.printf(268, 384, id(med1_boldfont), my_white, TextAlign::CENTER, "%.1fv", id(sm1_batvoltage).state); //Write bat voltage
           if (id(prod_bat).state >0) {
@@ -601,19 +599,19 @@ display:
           // bargraph Panneaux Batteries
           if (abs(id(sm1_panelwatts).state) >=1) {
           it.filled_rectangle(244, 282, 6,20 , my_green);}
-          if (abs(id(sm1_panelwatts).state) >52) {
+          if (abs(id(sm1_panelwatts).state) >167) {
           it.filled_rectangle(252, 282, 6,20 , my_green);}
-          if (abs(id(sm1_panelwatts).state) >104) {
+          if (abs(id(sm1_panelwatts).state) >334) {
           it.filled_rectangle(260, 282, 6,20 , my_green);}
-          if (abs(id(sm1_panelwatts).state) >156) {
+          if (abs(id(sm1_panelwatts).state) >501) {
           it.filled_rectangle(268, 282, 6,20 , my_yellow);}
-          if (abs(id(sm1_panelwatts).state) >208) {
+          if (abs(id(sm1_panelwatts).state) >668) {
           it.filled_rectangle(276, 282, 6,20 , my_yellow);}
-          if (abs(id(sm1_panelwatts).state) >260) {
+          if (abs(id(sm1_panelwatts).state) >835) {
           it.filled_rectangle(284, 282, 6,20 , my_yellow);}
-          if (abs(id(sm1_panelwatts).state) >312) {
+          if (abs(id(sm1_panelwatts).state) >1002) {
           it.filled_rectangle(292, 282, 6,20 , my_red);}
-          if (abs(id(sm1_panelwatts).state) >364) {
+          if (abs(id(sm1_panelwatts).state) >1169) {
           it.filled_rectangle(300, 282, 6,20 , my_red);}
           // bargraph pourcent Batteries
           if (abs(id(batprcent).state) >=25) {
